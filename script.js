@@ -92,7 +92,42 @@ transactionForm.addEventListener("submit", function (event) {
     typeInput.value = "expense";
 });
 
+// ==============================
+// Edit Transaction
+// ==============================
 
+function editTransaction(id) {
+
+    const transaction = transactions.find(function (transaction) {
+        return transaction.id === id;
+    });
+
+    if (!transaction) {
+        return;
+    }
+
+    // Put existing values back into the form
+    descriptionInput.value = transaction.description;
+    amountInput.value = transaction.amount;
+    typeInput.value = transaction.type;
+    categoryInput.value = transaction.category;
+    dateInput.value = transaction.date;
+
+    // Remove old transaction
+    transactions = transactions.filter(function (transaction) {
+        return transaction.id !== id;
+    });
+
+    saveTransactions();
+    updateApp();
+
+    // Move user back to the form
+    transactionForm.scrollIntoView({
+        behavior: "smooth"
+    });
+
+    descriptionInput.focus();
+}
 // ==============================
 // Delete Transaction
 // ==============================
@@ -209,6 +244,13 @@ function displayTransactions() {
                 <span class="${transaction.type}">
                     ${sign}${formatCurrency(transaction.amount)}
                 </span>
+
+                <button
+                    class="edit-btn"
+                    onclick="editTransaction(${transaction.id})"
+                >
+                    Edit
+                </button>
 
                 <button
                     class="delete-btn"
