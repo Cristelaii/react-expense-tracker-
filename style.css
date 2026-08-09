@@ -284,3 +284,13 @@ button:hover {
         align-items: flex-end;
     }
 }
+.edit-btn {
+    background: #e0e7ff;
+    color: #3730a3;
+    padding: 7px 10px;
+    margin: 0;
+}
+
+.edit-btn:hover {
+    background: #c7d2fe;
+}
