@@ -1,7 +1,9 @@
 // ==============================
 // Get HTML Elements
 // ==============================
-
+const searchInput = document.getElementById("searchInput");
+const submitButton = document.getElementById("submitButton");
+const cancelEditButton = document.getElementById("cancelEditButton");
 const transactionForm = document.getElementById("transactionForm");
 const descriptionInput = document.getElementById("description");
 const amountInput = document.getElementById("amount");
@@ -15,6 +17,11 @@ const expensesElement = document.getElementById("expenses");
 
 const transactionList = document.getElementById("transactionList");
 const categoryFilter = document.getElementById("categoryFilter");
+const chartMonth = document.getElementById("chartMonth");
+const expenseChartCanvas =
+    document.getElementById("expenseChart");
+
+let expenseChart = null;
 
 
 // ==============================
@@ -32,6 +39,18 @@ let editingTransactionId = null;
 // ==============================
 // Currency Formatter
 // ==============================
+function setCurrentMonth() {
+
+    const today = new Date();
+
+    const year = today.getFullYear();
+
+    const month = String(
+        today.getMonth() + 1
+    ).padStart(2, "0");
+
+    chartMonth.value = `${year}-${month}`;
+}
 
 function formatCurrency(amount) {
     return new Intl.NumberFormat("en-PH", {
@@ -170,24 +189,20 @@ transactionForm.addEventListener("submit", function (event) {
 
     // Return button to Add mode
 
-    const submitButton =
-        transactionForm.querySelector(
-            'button[type="submit"]'
-        );
-
     submitButton.textContent = "Add Transaction";
-});
+    cancelEditButton.style.display = "none";
+
+    }); // ← THIS WAS MISSING
 
 
-// ==============================
-// Edit Transaction
-// ==============================
+    // ==============================
+    // Edit Transaction
+    // ==============================
 
-function editTransaction(id) {
+    function editTransaction(id) {
 
     // Find transaction
-    const transaction = transactions.find(
-        function (transaction) {
+    const transaction = transactions.find(function (transaction) {
 
             return transaction.id === id;
         }
@@ -226,15 +241,10 @@ function editTransaction(id) {
 
     // Change button text
 
-    const submitButton =
-        transactionForm.querySelector(
-            'button[type="submit"]'
-        );
+    submitButton.textContent = "Update Transaction";
+    cancelEditButton.style.display = "block";
 
-    submitButton.textContent =
-        "Update Transaction";
-
-
+    
     // Scroll back to form
 
     transactionForm.scrollIntoView({
@@ -246,6 +256,25 @@ function editTransaction(id) {
 
     descriptionInput.focus();
 }
+    // ==============================
+    // Cancel Edit
+    // ==============================
+
+    cancelEditButton.addEventListener("click", function () {
+
+        editingTransactionId = null;
+
+        transactionForm.reset();
+
+        typeInput.value = "expense";
+
+        setTodayDate();
+
+        submitButton.textContent = "Add Transaction";
+
+        cancelEditButton.style.display = "none";
+    });
+
 
 
 // ==============================
@@ -332,31 +361,31 @@ function displayTransactions() {
 
     const selectedCategory =
         categoryFilter.value;
+    const searchText = searchInput.value
+    .trim()
+    .toLowerCase();
 
 
     // ==========================
     // Filter Transactions
     // ==========================
 
-    const filteredTransactions =
-        transactions.filter(
-            function (transaction) {
+    const filteredTransactions = transactions.filter(
+    function (transaction) {
 
-                if (
-                    selectedCategory === "all"
-                ) {
+        const matchesCategory =
+            selectedCategory === "all" ||
+            transaction.category === selectedCategory;
 
-                    return true;
-                }
+        const matchesSearch =
+            transaction.description
+                .toLowerCase()
+                .includes(searchText);
 
-
-                return (
-                    transaction.category ===
-                    selectedCategory
-                );
-            }
-        );
-
+        return matchesCategory && matchesSearch;
+    }
+);
+    
 
     // ==========================
     // Empty List
@@ -474,30 +503,130 @@ function displayTransactions() {
 }
 
 
+
+// ==============================
+// Search Transactions
+// ==============================
+
+searchInput.addEventListener("input", function () {
+    displayTransactions();
+});
+
+
 // ==============================
 // Category Filter
 // ==============================
 
-categoryFilter.addEventListener(
-    "change",
-    function () {
-
-        displayTransactions();
-    }
-);
-
+categoryFilter.addEventListener("change", function () {
+    displayTransactions();
+});
 
 // ==============================
 // Update Entire Application
 // ==============================
 
 function updateApp() {
-
     updateSummary();
-
     displayTransactions();
+    updateExpenseChart();
 }
 
+// ==============================
+// Expense Chart
+// ==============================
+
+function updateExpenseChart() {
+
+    const selectedMonth = chartMonth.value;
+
+    const categoryTotals = {
+        Food: 0,
+        Transportation: 0,
+        Bills: 0,
+        Shopping: 0,
+        Other: 0
+    };
+
+
+    // Find expenses for selected month
+    transactions.forEach(function (transaction) {
+
+        const transactionMonth =
+            transaction.date.slice(0, 7);
+
+        if (
+            transaction.type === "expense" &&
+            transactionMonth === selectedMonth
+        ) {
+
+            if (categoryTotals[transaction.category] !== undefined) {
+                categoryTotals[transaction.category] +=
+                    transaction.amount;
+            }
+        }
+    });
+
+            chartMonth.addEventListener("change", function () {
+            updateExpenseChart();
+        });
+
+
+    const labels = Object.keys(categoryTotals);
+
+    const data = Object.values(categoryTotals);
+
+
+    // Destroy previous chart before creating new one
+    if (expenseChart) {
+        expenseChart.destroy();
+    }
+
+
+    expenseChart = new Chart(expenseChartCanvas, {
+
+        type: "doughnut",
+
+        data: {
+
+            labels: labels,
+
+            datasets: [{
+                label: "Expenses",
+                data: data,
+                borderWidth: 2
+            }]
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: {
+                    position: "bottom"
+                },
+
+                tooltip: {
+
+                    callbacks: {
+
+                        label: function (context) {
+
+                            return (
+                                context.label +
+                                ": " +
+                                formatCurrency(context.raw)
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
 
 // ==============================
 // Set Today's Date
@@ -531,6 +660,6 @@ function setTodayDate() {
 // Start Application
 // ==============================
 
+setCurrentMonth();
 updateApp();
-
 setTodayDate();
