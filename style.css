@@ -390,3 +390,67 @@ button:hover {
         height: 250px;
     }
 }
+
+/* =========================
+   Spending Statistics
+========================= */
+
+.statistics-section {
+    margin-bottom: 30px;
+}
+
+.statistics-header {
+    margin-bottom: 15px;
+}
+
+.statistics-header h2 {
+    margin-bottom: 5px;
+}
+
+.statistics-header p {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.statistics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.stat-card p {
+    color: #6b7280;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.stat-card h3 {
+    font-size: 20px;
+}
+
+
+/* Tablet */
+
+@media (max-width: 800px) {
+
+    .statistics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+
+/* Mobile */
+
+@media (max-width: 500px) {
+
+    .statistics-grid {
+        grid-template-columns: 1fr;
+    }
+}
