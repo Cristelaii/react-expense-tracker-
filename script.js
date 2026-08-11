@@ -34,7 +34,45 @@ let transactions =
 
 // Keeps track of transaction being edited
 let editingTransactionId = null;
+// ==============================
+// Transaction Categories
+// ==============================
 
+const categories = {
+    expense: [
+        "Food",
+        "Transportation",
+        "Bills",
+        "Shopping",
+        "Entertainment",
+        "Health",
+        "Other"
+    ],
+
+    income: [
+        "Salary",
+        "Freelance",
+        "Business",
+        "Gift",
+        "Other"
+    ]
+};
+function updateCategoryOptions() {
+
+    const selectedType = typeInput.value;
+
+    categoryInput.innerHTML = "";
+
+    categories[selectedType].forEach(function (category) {
+
+        const option = document.createElement("option");
+
+        option.value = category;
+        option.textContent = category;
+
+        categoryInput.appendChild(option);
+    });
+}
 
 // ==============================
 // Currency Formatter
@@ -230,8 +268,10 @@ transactionForm.addEventListener("submit", function (event) {
         transaction.amount;
 
     typeInput.value =
-        transaction.type;
+    transaction.type;
 
+    updateCategoryOptions();
+    
     categoryInput.value =
         transaction.category;
 
@@ -501,8 +541,9 @@ function displayTransactions() {
         }
     );
 }
-
-
+typeInput.addEventListener("change", function () {
+    updateCategoryOptions();
+});
 
 // ==============================
 // Search Transactions
@@ -660,6 +701,7 @@ function setTodayDate() {
 // Start Application
 // ==============================
 
+updateCategoryOptions();
 setCurrentMonth();
 updateApp();
 setTodayDate();
