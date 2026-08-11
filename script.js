@@ -220,6 +220,9 @@ transactionForm.addEventListener("submit", function (event) {
     // Return type to expense
     typeInput.value = "expense";
 
+    // Restore expense categories
+    updateCategoryOptions();
+
 
     // Return date to today
     setTodayDate();
@@ -307,6 +310,8 @@ transactionForm.addEventListener("submit", function (event) {
         transactionForm.reset();
 
         typeInput.value = "expense";
+
+        updateCategoryOptions();
 
         setTodayDate();
 
@@ -581,13 +586,14 @@ function updateExpenseChart() {
     const selectedMonth = chartMonth.value;
 
     const categoryTotals = {
-        Food: 0,
-        Transportation: 0,
-        Bills: 0,
-        Shopping: 0,
-        Other: 0
-    };
-
+    Food: 0,
+    Transportation: 0,
+    Bills: 0,
+    Shopping: 0,
+    Entertainment: 0,
+    Health: 0,
+    Other: 0
+};
 
     // Find expenses for selected month
     transactions.forEach(function (transaction) {
